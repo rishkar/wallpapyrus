@@ -9,8 +9,6 @@ import urllib.request
 from PIL import Image
 import ctypes
 
-# TODO: Clean up database of used images after each one's lifetime exceeds a month. We can either store the associated
-#  timestamp with the image or just delete images after 30 days. (leaning towards first) as json
 
 # Get and read config
 config_arr = configparser.ConfigParser()
@@ -25,7 +23,12 @@ if os.path.exists('database.json'):
 # Clean up any old images in the database
 for post in usedImages:
     if (datetime.now() - datetime.strptime(usedImages[post], "%Y%m%d%H%M%S")) > timedelta(days=31): # TODO: change according to config
-        usedImages.pop(post)
+        # Delete the file first
+        oldImage = glob.glob("image/%s.*" % post)
+        if oldImage[0]:
+            os.remove(oldImage[0])
+        del post
+
 
 
 # Set up reddit instance and grab values from config.ini
